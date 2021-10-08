@@ -1,9 +1,9 @@
 package net.digitalingot.featherserverapi.abstractions;
 
+import com.google.gson.Gson;
 import net.digitalingot.featherserverapi.FeatherServerAPI;
-import net.digitalingot.featherserverapi.proto.ClientHello;
-import net.digitalingot.featherserverapi.proto.DisableMods;
-import net.digitalingot.featherserverapi.proto.SetWaypoints;
+import net.digitalingot.featherserverapi.proto.*;
+import net.digitalingot.featherserverapi.proto.models.PacketType;
 import net.digitalingot.featherserverapi.proto.models.Waypoint;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -36,7 +36,7 @@ public abstract class FeatherUser {
      */
     public void disableMods(@NotNull List<String> mods) {
         DisableMods disableMods = new DisableMods(mods);
-        sendPacket(disableMods);
+        sendPacket(PacketType.Clientbound.DISABLE_MODS, disableMods);
     }
 
     /**
@@ -46,20 +46,32 @@ public abstract class FeatherUser {
      */
     public void setWaypoints(@NotNull List<Waypoint> waypoints) {
         SetWaypoints setWaypoints = new SetWaypoints(waypoints);
-        sendPacket(setWaypoints);
+        sendPacket(PacketType.Clientbound.SET_WAYPOINTS, setWaypoints);
     }
 
     /**
      * Sends the provided packet to the client.<br>
      * The object is translated to JSON using Gson.
      *
-     * @param packet the packet to be sent to the client
+     * @param type    the packet type
+     * @param payload the packet to be sent to the client
      * @see FeatherUser#sendRawPacket(byte[])
      */
-    private void sendPacket(@NotNull Object packet) {
-        String serialized = FeatherServerAPI.getInstance().getGson().toJson(packet);
+    private void sendPacket(@NotNull PacketType.Clientbound type, @NotNull Object payload) {
+        Gson gson = FeatherServerAPI.getInstance().getGson();
+
+        ClientboundWrapper wrapper = new ClientboundWrapper(type, gson.toJsonTree(payload));
+        String serialized = gson.toJson(wrapper);
         sendRawPacket(serialized.getBytes(StandardCharsets.UTF_8));
     }
+
+    /**
+     * Sends the provided packet to the client.
+     *
+     * @param packet the packet to be sent to the client
+     * @see FeatherUser#sendPacket(PacketType.Clientbound, Object)
+     */
+    protected abstract void sendRawPacket(byte[] packet);
 
     /**
      * Executed when the player connects.
@@ -81,26 +93,28 @@ public abstract class FeatherUser {
      * @param packet the packet sent to the server
      */
     public void onReceivePacket(byte[] packet) {
-        String serializedJson = new String(packet, StandardCharsets.UTF_8);
+        try {
+            String serializedJson = new String(packet, StandardCharsets.UTF_8);
 
-        // as we currently only have one C->S packet, we don't need more sophisticated handling yet
-        ClientHello clientHello = FeatherServerAPI.getInstance().getGson().fromJson(serializedJson, ClientHello.class);
+            Gson gson = FeatherServerAPI.getInstance().getGson();
+            ServerboundWrapper wrapper = gson.fromJson(serializedJson, ServerboundWrapper.class);
 
-        mods = clientHello.getFeatherMods();
-
-        this.onClientHello();
+            PacketType.Serverbound packetType = wrapper.getPacketType();
+            switch (packetType) {
+                case CLIENT_HELLO:
+                    ClientHello clientHello = gson.fromJson(wrapper.getPayload(), ClientHello.class);
+                    mods = clientHello.getFeatherMods();
+                    this.onClientHello();
+                    break;
+            }
+        } catch (Exception e) {
+            System.err.println("Exception during feather packet receive from " + getUUID());
+            e.printStackTrace();
+        }
     }
 
     protected void onClientHello() {
     }
-
-    /**
-     * Sends the provided packet to the client.
-     *
-     * @param packet the packet to be sent to the client
-     * @see FeatherUser#sendPacket(Object)
-     */
-    protected abstract void sendRawPacket(byte[] packet);
 
     /**
      * Gets the uuid of the player.
