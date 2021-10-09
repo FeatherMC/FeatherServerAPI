@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
-public class BungeeFeatherUser extends FeatherUser {
+class BungeeFeatherUser extends FeatherUser {
 
     @NotNull
     private final ProxiedPlayer player;

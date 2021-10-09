@@ -10,7 +10,7 @@ import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.event.EventHandler;
 import org.jetbrains.annotations.NotNull;
 
-public class BungeeEventListener implements Listener {
+class BungeeEventListener implements Listener {
 
     @NotNull
     private final Plugin plugin;
