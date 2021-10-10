@@ -17,7 +17,6 @@ public class FeatherAPIVelocityHook {
 
     /**
      * Should be called in the {@link com.velocitypowered.api.event.proxy.ProxyInitializeEvent}
-     * and {@link com.velocitypowered.api.event.proxy.ProxyReloadEvent} (after {@link #onDisable(Object, ProxyServer)} of the velocity plugin.
      *
      * @param plugin the plugin instance
      * @param server the server instance
@@ -28,18 +27,6 @@ public class FeatherAPIVelocityHook {
 
         server.getChannelRegistrar().register(CHANNEL_IDENTIFIER);
         server.getEventManager().register(server, new VelocityEventListener(server));
-    }
-
-    /**
-     * Should be called in the {@link com.velocitypowered.api.event.proxy.ProxyReloadEvent} of the bukkit plugin.
-     *
-     * @param plugin the plugin instance
-     * @param server the server instance
-     */
-    public static void onDisable(@NotNull Object plugin, @NotNull ProxyServer server) {
-        if (plugin != FeatherAPIVelocityHook.plugin) return;
-
-        server.getChannelRegistrar().unregister(CHANNEL_IDENTIFIER);
     }
 
 }
