@@ -12,7 +12,7 @@ import java.util.UUID;
 public class FeatherServerAPI {
 
     @NotNull
-    public static final String PLUGIN_MESSAGE_NAME = "FeatherClient";
+    public static final String PLUGIN_MESSAGE_NAME = "feather:FeatherClient";
     @NotNull
     private static final FeatherServerAPI INSTANCE = new FeatherServerAPI();
 
@@ -28,7 +28,7 @@ public class FeatherServerAPI {
 
     /**
      * Returns the {@link FeatherUser} instance from the {@code uuid} provided.
-     *
+     * <p>
      * This only returns an instance after the client has registered the plugin channel.
      *
      * @return the feather user instance
