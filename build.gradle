@@ -1,8 +1,8 @@
 plugins {
     id 'java'
     id 'idea'
-    id "com.github.johnrengelman.shadow" version "7.0.0"
     id 'maven-publish'
+    id "com.jfrog.artifactory" version "4.24.20"
 }
 
 group 'net.digitalingot'
@@ -10,6 +10,9 @@ version '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
+    maven {
+        url 'https://artifactory.feathermc.net/artifactory/feather-public'
+    }
     maven {
         url 'https://jitpack.io'
     }
@@ -22,14 +25,13 @@ repositories {
     maven {
         url 'https://repo.velocitypowered.com/snapshots/'
     }
-    mavenLocal() // todo: remove
 }
 
 dependencies {
     compileOnly group: 'org.jetbrains', name: 'annotations', version: '16.0.1'
 
     // protocol definitions
-    shadow group: 'net.digitalingot', name: 'feather-server-api-proto', version: '1.0-SNAPSHOT'
+    implementation group: 'net.digitalingot', name: 'feather-server-api-proto', version: '1.0-SNAPSHOT'
 
     // Platforms
     compileOnly group: 'org.spigotmc', name: 'spigot-api', version: '1.16.4-R0.1-SNAPSHOT'
@@ -46,10 +48,24 @@ publishing {
             from components.java
         }
     }
-    repositories {
-        mavenLocal()
+}
+
+artifactory {
+    publish {
+        contextUrl = "https://artifactory.feathermc.net/artifactory"
+
+        repository {
+            repoKey = "feather-public"
+            username = System.getenv("ARTIFACTORY_USERNAME")
+            password = System.getenv("ARTIFACTORY_PASSWORD")
+        }
+
+        defaults {
+            publications 'mavenJava'
+        }
     }
 }
+
 
 idea {
     module {
@@ -61,10 +77,6 @@ idea {
 compileJava {
     sourceCompatibility = targetCompatibility = '1.8'
     options.encoding = 'UTF-8'
-}
-
-shadowJar {
-    configurations = [project.configurations.shadow]
 }
 
 test {
