@@ -12,7 +12,7 @@ import java.util.UUID;
 public class FeatherServerAPI {
 
     @NotNull
-    public static final String PLUGIN_MESSAGE_NAME = "feather:featherclient";
+    public static final String PLUGIN_MESSAGE_NAME = "feather:client";
     @NotNull
     private static final FeatherServerAPI INSTANCE = new FeatherServerAPI();
 
