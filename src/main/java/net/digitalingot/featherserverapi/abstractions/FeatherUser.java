@@ -50,6 +50,15 @@ public abstract class FeatherUser {
     }
 
     /**
+     * Disables the hit delay for the player.
+     * <p>
+     * This is only available for players on 1.8!
+     */
+    public void disableHitDelay() {
+        sendPacket(PacketType.Clientbound.DISABLE_HIT_DELAY, new DisableHitDelay());
+    }
+
+    /**
      * Sends the provided packet to the client.<br>
      * The object is translated to JSON using Gson.
      *
