@@ -3,6 +3,7 @@ package net.digitalingot.featherserverapi.abstractions;
 import com.google.gson.Gson;
 import net.digitalingot.featherserverapi.FeatherServerAPI;
 import net.digitalingot.featherserverapi.proto.*;
+import net.digitalingot.featherserverapi.proto.models.Mod;
 import net.digitalingot.featherserverapi.proto.models.PacketType;
 import net.digitalingot.featherserverapi.proto.models.Waypoint;
 import org.jetbrains.annotations.NotNull;
@@ -15,7 +16,9 @@ import java.util.UUID;
 public abstract class FeatherUser {
 
     @Nullable
-    private List<String> mods;
+    private List<String> featherMods;
+    @Nullable
+    private List<Mod> mods;
 
     /**
      * Returns the mods the player uses. Returns {@code null} when executed before the client has sent {@link net.digitalingot.featherserverapi.proto.ClientHello}.
@@ -25,6 +28,16 @@ public abstract class FeatherUser {
      */
     @Nullable
     public List<String> getMods() {
+        return featherMods;
+    }
+
+    /**
+     * Returns the forge / fabric mods the player has installed.
+     *
+     * @return the mods the player has installed
+     */
+    @Nullable
+    public List<Mod> getModLauncherMods() {
         return mods;
     }
 
@@ -112,7 +125,8 @@ public abstract class FeatherUser {
             switch (packetType) {
                 case CLIENT_HELLO:
                     ClientHello clientHello = gson.fromJson(wrapper.getPayload(), ClientHello.class);
-                    mods = clientHello.getFeatherMods();
+                    featherMods = clientHello.getFeatherMods();
+                    mods = clientHello.getMods();
                     this.onClientHello();
                     break;
             }
